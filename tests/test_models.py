@@ -52,7 +52,7 @@ class TestProductModel(unittest.TestCase):
         app.config["DEBUG"] = False
         app.config["SQLALCHEMY_DATABASE_URI"] = DATABASE_URI
         app.logger.setLevel(logging.CRITICAL)
-        Product.init_db(app)
+        
 
     @classmethod
     def tearDownClass(cls):
@@ -60,7 +60,8 @@ class TestProductModel(unittest.TestCase):
         db.session.close()
 
     def setUp(self):
-        """This runs before each test"""
+        """This runs before each test"""   
+        self.client = app.test_client()
         db.session.query(Product).delete()  # clean up the last tests
         db.session.commit()
 

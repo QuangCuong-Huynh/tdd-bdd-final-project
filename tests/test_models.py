@@ -26,7 +26,8 @@ While debugging just these tests it's convenient to use this:
 import os
 import logging
 import unittest
-from nose.tools import assert_raises
+from nose.tools import raises, assert_raises
+from service.models import DataValidationError
 from decimal import Decimal
 from service.models import Product, Category, db
 from service import app
@@ -192,3 +193,136 @@ class TestProductModel(unittest.TestCase):
         self.assertEqual(found.count(), count)
         for product in found:
             self.assertEqual(product.category, category)
+    
+    def test_update_with_empty_id_raises_error(self):
+        product = Product(name="Test Product")
+        product.id = None
+        with assert_raises(DataValidationError):
+            product.update()
+
+            
+    def test_deserialize_success(self):
+        """ Successfully deserialize a valid product dict """
+        self.product = Product()
+        data = {
+            "name": "Laptop",
+            "description": "Gaming laptop",
+            "price": "1200.50",
+            "available": True,
+            "category": "AUTOMOTIVE"
+        }
+        product = self.product.deserialize(data)
+        assert product.name == "Laptop"
+        assert product.description == "Gaming laptop"
+        assert product.price == Decimal("1200.50")
+        assert product.available is True
+        assert product.category == Category.AUTOMOTIVE
+
+    @raises(DataValidationError)
+    def test_deserialize_missing_field_raises(self):
+        """ Missing 'name' should raise DataValidationError """
+        self.product = Product()
+        data = {
+            # "name": "Laptop",   # Missing!
+            "description": "Gaming laptop",
+            "price": "1200.50",
+            "available": True,
+            "category": "ELECTRONICS"
+        }
+        self.product.deserialize(data)
+
+    @raises(DataValidationError)
+    def test_deserialize_invalid_boolean_type(self):
+        """ Non-bool available should raise DataValidationError """
+        self.product = Product()
+        data = {
+            "name": "Laptop",
+            "description": "Gaming laptop",
+            "price": "1200.50",
+            "available": "True",   # ❌ string instead of bool
+            "category": "ELECTRONICS"
+        }
+        self.product.deserialize(data)
+
+    @raises(DataValidationError)
+    def test_deserialize_invalid_category(self):
+        """ Invalid category should raise DataValidationError """
+        self.product = Product()
+        data = {
+            "name": "Laptop",
+            "description": "Gaming laptop",
+            "price": "1200.50",
+            "available": True,
+            "category": "NON_EXISTENT"  # ❌ not in Category enum
+        }
+        self.product.deserialize(data)
+
+    @raises(DataValidationError)
+    def test_deserialize_with_none_input(self):
+        """ None as input should raise DataValidationError """
+        self.product = Product()
+        self.product.deserialize(None)
+
+    def test_deserialize_price_as_decimal(self):
+        """ Ensure price is converted to Decimal """
+        self.product = Product()
+        data = {
+            "name": "Phone",
+            "description": "Smartphone",
+            "price": "999.99",
+            "available": False,
+            "category": "AUTOMOTIVE"
+        }
+        product = self.product.deserialize(data)
+        assert isinstance(product.price, Decimal)
+
+from unittest.mock import MagicMock, patch
+from decimal import Decimal
+
+class TestProductFindByPrice(unittest.TestCase):
+
+    def setUp(self):
+        self.price_decimal = Decimal("19.99")
+        self.price_str = "19.99"
+
+    def test_find_by_price_with_decimal(self):
+        """ find_by_price should call filter with Decimal price """
+        with patch.object(Product, "query") as mock_query:
+            mock_filter = MagicMock()
+            mock_query.filter.return_value = mock_filter
+
+            result = Product.find_by_price(self.price_decimal)
+
+            # check filter was called once
+            assert mock_query.filter.call_count == 1
+            called_arg = mock_query.filter.call_args[0][0]
+
+            # right-hand side of SQLAlchemy expression should equal Decimal
+            assert called_arg.right.value == self.price_decimal
+            assert result == mock_filter
+
+    def test_find_by_price_with_string(self):
+        """ find_by_price should convert string to Decimal """
+        with patch.object(Product, "query") as mock_query:
+            mock_filter = MagicMock()
+            mock_query.filter.return_value = mock_filter
+
+            result = Product.find_by_price(self.price_str)
+
+            called_arg = mock_query.filter.call_args[0][0]
+            assert called_arg.right.value == self.price_decimal
+            assert result == mock_filter
+
+    def test_find_by_price_with_extra_quotes_in_string(self):
+        """ find_by_price should strip quotes and spaces """
+        with patch.object(Product, "query") as mock_query:
+            mock_filter = MagicMock()
+            mock_query.filter.return_value = mock_filter
+
+            price_input = ' "19.99" '
+            result = Product.find_by_price(price_input)
+
+            called_arg = mock_query.filter.call_args[0][0]
+            assert called_arg.right.value == self.price_decimal
+            assert result == mock_filter
+

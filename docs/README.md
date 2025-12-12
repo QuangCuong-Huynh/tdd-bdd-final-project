@@ -13,26 +13,32 @@
 
 ### **TDD for API Development (STAR)**
 
-**S —** Needed to build a stable, scalable REST API microservice for an eCommerce product catalog capable of frequent updates without regressions.
-**T —** Implement all CRUD + search endpoints using strict TDD, targeting **95%+ code coverage** and zero linting issues.
-**A —**
+**Situation —** Needed to build a stable, scalable REST API microservice for an eCommerce product catalog capable of frequent updates without regressions.
+
+**Task —** Implement all CRUD + search endpoints using strict TDD, targeting **95%+ code coverage** and zero linting issues.
+
+**Action —**
 
 * Applied full **Red → Green → Refactor** cycle for every API function.
 * Built comprehensive **unit, integration, and system tests** using Nose; used **fixtures & mocking** to isolate components.
 * Completed all missing business logic and finalized Create/Read/Update/Delete/List endpoints.
-  **R —** Delivered a **highly maintainable** API with **95%+ test coverage**, all tests green, clean linting, and significantly reduced defect risk during future iterations.
+
+**Result —** Delivered a **highly maintainable** API with **95%+ test coverage**, all tests green, clean linting, and significantly reduced defect risk during future iterations.
 
 ---
 
 ### **BDD for UI Validation (STAR)**
 
-**S —** After API completion, the system needed validation from the admin user’s perspective to ensure UI + backend behaviors matched business rules.
-**T —** Define and automate **BDD scenarios** to validate CRUD and search workflows from the UI.
-**A —**
+**Situation —** After API completion, the system needed validation from the admin user’s perspective to ensure UI + backend behaviors matched business rules.
+
+**Task —** Define and automate **BDD scenarios** to validate CRUD and search workflows from the UI.
+
+**Action —**
 
 * Authored **7 BDD scenarios** (CRUD, search by category/name/availability) using *Given–When–Then*.
 * Set up BDD test environment with **Behave + Selenium**, including automated service data loading per scenario.
 * Implemented reusable step definitions and stable automated flows.
-  **R —** All scenarios passed, confirming end-to-end correctness. Delivered business-readable acceptance tests and ensured UI/API alignment for real user workflows.
+
+**Result —** All scenarios passed, confirming end-to-end correctness. Delivered business-readable acceptance tests and ensured UI/API alignment for real user workflows.
 
 ---

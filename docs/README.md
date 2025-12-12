@@ -5,8 +5,11 @@
 > **Engineered a production-style microservice with 95%+ automated test coverage, combining TDD/BDD, Selenium UI automation, and robust API development to deliver a highly reliable and maintainable backend system.**
 
 ---
+
 **Role:** QA / Test Automation / DevOps Engineer
+
 **Tech:** Python, Flask, TDD/BDD, Nose, Selenium, Behave, GitHub, CI practices, Mocking & Fixtures
+
 **Focus:** Automated Testing • API Quality • Systems Integration • Software Engineering
 
 ---
